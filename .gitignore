@@ -1,0 +1,6 @@
+.DS_Store
+*.zip
+node_modules/
+tests/e2e/out/
+tests/e2e/.profile*/
+build/

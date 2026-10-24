@@ -1,0 +1,237 @@
+/* Copyright (C) 2026 The Text Find+ contributors
+   SPDX-License-Identifier: GPL-3.0-or-later */
+
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(#ffffff, #1f1f21);
+  --bg2: light-dark(#f5f5f7, #2a2a2d);
+  --bg3: light-dark(#ebebee, #333336);
+  --border: light-dark(#d1d1d6, #48484c);
+  --text: light-dark(#1d1d1f, #f5f5f7);
+  --muted: light-dark(#6e6e73, #a1a1a6);
+  --accent: light-dark(#0a66d8, #4c9bff);
+  --error: light-dark(#d70015, #ff6b6b);
+  --warn: light-dark(#9a5800, #f0b45c);
+  --fold: light-dark(#48484a, #c7c7cc);
+  --tip: light-dark(#eaf2fd, rgba(76, 155, 255, 0.14));
+  /* header buttons: navigation green, Clear amber, Close red; the cheat sheet is a soft yellow */
+  --nav-bg: light-dark(#e9f7ee, rgba(70, 200, 120, 0.16)); --nav-border: light-dark(#2f9e57, #46c878); --nav-text: light-dark(#1d7a3e, #93e6b0);
+  --sheet-bg: light-dark(#fffbea, rgba(255, 210, 70, 0.07)); --sheet-head: light-dark(#fff1bd, rgba(255, 210, 70, 0.15)); --sheet-border: light-dark(#e2bd3c, rgba(255, 210, 70, 0.5)); --sheet-text: light-dark(#6e5200, #ffe08a);
+  --clear-bg: light-dark(#fff4e5, rgba(240, 163, 58, 0.16)); --clear-border: light-dark(#e8932a, #f0a33a); --clear-text: light-dark(#8a4b00, #ffc777);
+  --close-bg: light-dark(#fdecec, rgba(255, 107, 107, 0.16)); --close-border: light-dark(#e5484d, #ff6b6b); --close-text: light-dark(#b4232a, #ffa3a3);
+}
+/* The #theme button (theme.js) forces a mode; with no data-theme the popup follows Chrome's own setting. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+
+/* Both columns are exactly as wide as their longest line, so nothing wraps and nothing is wasted.
+   The cheat sheet opens as a panel on the left (main window + panel stay under Chrome's 800px cap). */
+.app { flex: none; width: max-content; }
+
+body {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+main button:hover, .messages button:hover { border-color: var(--accent); }
+button.icon { min-width: 28px; padding: 4px 6px; }
+/* The svg is as tall as a text line and fits the button's min-width, so the button is the size of the other icon buttons. */
+#theme { padding-inline: 4px; }
+#theme sup { font-size: 8px; line-height: 0; margin-left: 1px; }
+#collapse { padding-inline: 4px; color: var(--fold); }
+#collapse svg { display: block; width: 16px; height: 1lh; overflow: visible; }
+#collapse[aria-expanded="false"] svg { transform: rotate(180deg); }
+#prev, #next { font-weight: 700; color: var(--nav-text); background: var(--nav-bg); border-color: var(--nav-border); }
+#clear { font-weight: 600; color: var(--clear-text); background: var(--clear-bg); border-color: var(--clear-border); }
+#close, #cheatClose { font-weight: 600; color: var(--close-text); background: var(--close-bg); border-color: var(--close-border); }
+.bar button:hover { filter: brightness(0.96); }
+/* The arrows while there is no match to move to (popup.js): dimmed as a disabled box is, with no hand and no hover. */
+#prev:disabled, #next:disabled { opacity: 0.5; cursor: default; filter: none; }
+
+code {
+  font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+
+/* Sticky header: title, count, navigation and messages never scroll away (popups max out at 600px). */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 12px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+/* Collapsed (#collapse): only the header shows, so the popup shrinks to it. The cheat sheet's state is kept. */
+.collapsed main, .collapsed .cheat-panel { display: none; }
+.bar { display: flex; align-items: center; gap: 6px; }
+.bar h1 { flex: 1; margin: 0; font-size: 13px; }
+.count { min-width: 7.5em; margin-right: 4px; color: var(--text); font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; }
+
+/* Messages wrap inside the width set by the rest of the popup instead of widening it. */
+.messages { display: flex; flex-direction: column; gap: 6px; width: 0; min-width: 100%; margin-top: 6px; font-size: 12px; }
+.messages:empty { display: none; }
+.messages .error { color: var(--error); }
+.messages .raw { display: block; margin-top: 2px; font: 10.5px ui-monospace, Menlo, monospace; opacity: 0.8; }
+.messages .status { color: var(--warn); }
+.messages .tip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--tip);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+}
+.messages .tip button { align-self: flex-start; border-color: var(--accent); }
+
+main { display: flex; flex-direction: column; gap: 6px; padding: 8px 12px 10px; }
+
+.cant {
+  width: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--error);
+  border-radius: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px 7px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.head { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.head .sub { font-weight: 400; letter-spacing: 0; text-transform: none; }
+.headrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+input[type="text"] {
+  width: 100%;
+  padding: 5px 8px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input:disabled { opacity: 0.5; }
+/* The Any and All cards while the Regex box has text (popup.js): the whole card is dimmed as a disabled box is, and
+   the disabled controls inside it are not dimmed a second time. */
+.card.ignored { opacity: 0.5; }
+.card.ignored input:disabled { opacity: 1; }
+
+.check { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
+.check:has(> input:disabled) { cursor: default; } /* a disabled checkbox can't be ticked */
+.check.strong { font-size: 13px; font-weight: 600; }
+.desc { margin: 0; font-size: 11.5px; line-height: 1.4; color: var(--muted); }
+.opt { display: flex; align-items: baseline; gap: 10px; }
+.opt .check { flex-shrink: 0; }
+.desc.one { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* "How to type your words": neutral, set apart by its dashed outline and row layout. */
+.howto { padding: 6px 9px 2px; border: 1px dashed var(--border); border-radius: 8px; }
+.howto-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.howto-head svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--muted); }
+.howto-head .for { margin-left: auto; font-size: 11px; font-weight: 400; color: var(--muted); }
+.howto-row { display: grid; grid-template-columns: 5.6rem 1fr; gap: 9px; align-items: start; padding: 3px 0; border-top: 1px dashed var(--border); }
+.howto-head + .howto-row { border-top: none; }
+.howto-row .ex {
+  padding: 2px 5px;
+  font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.howto-row .rule { font-size: 11.5px; font-weight: 400; line-height: 1.35; color: var(--muted); }
+.howto-row .finds { margin-top: 1px; font-size: 11px; line-height: 1.35; color: var(--muted); opacity: 0.85; }
+.howto-row .finds b { font-weight: 600; }
+
+/* Regex cheat sheet: a soft-yellow left-hand panel as tall as the main window, scrolling on its own if needed.
+   Its width is set by popup.js to its longest symbol row. */
+.cheat-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-weight: 600;
+  color: var(--sheet-text);
+  text-align: left;
+  background: var(--sheet-bg);
+  border-color: var(--sheet-border);
+  border-radius: 7px;
+}
+.cheat-toggle[aria-expanded="true"] { background: var(--sheet-head); }
+main .cheat-toggle:hover { border-color: var(--sheet-text); }
+.cheat-toggle .arrow { font-size: 16px; line-height: 1; }
+.cheat-panel { position: relative; flex: none; background: var(--sheet-bg); border-right: 1px solid var(--sheet-border); }
+.cheat-inner { position: absolute; inset: 0; overflow-y: auto; scrollbar-gutter: stable; font-size: 12px; }
+.cheat-inner.measure { position: static; width: max-content; } /* only while popup.js measures it */
+.cheat-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* same height, colours and button as the main header (.top), so the two read as one header bar */
+  padding: 6px 12px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.cheat-head h2 { margin: 0; font-size: 13px; }
+.cheat-hint { margin: 6px 10px 0; color: var(--muted); }
+/* Filler lines take the panel's width instead of setting it; .justify spreads a line edge to edge. */
+.cs .fill { width: 0; min-width: 100%; }
+.cheat-hint.fill { width: 0; min-width: calc(100% - 20px); }
+.justify { text-align: justify; text-align-last: justify; }
+.cheat-panel .tok:hover, .cheat-panel .example:hover { border-color: var(--accent); }
+.cs { display: flex; flex-direction: column; gap: 7px; padding: 6px 10px 10px; }
+.grp { display: grid; grid-template-columns: 4.6rem 1fr; gap: 3px 8px; align-items: center; }
+.grp .head { grid-column: 1 / -1; margin-top: 2px; }
+.tok { padding: 1px 6px; font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; text-align: left; white-space: nowrap; }
+.lit { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.lit code { padding: 0 1px; font-size: 10.5px; }
+.examples { display: flex; flex-direction: column; gap: 5px; margin-top: -3px; }
+.example { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 5px 7px; text-align: left; }
+.example .what { font-size: 12px; }
+.example code { padding: 0; font-size: 11px; color: var(--muted); word-break: break-all; background: none; border: none; }
+
+/* Options band: applies to every box */
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 -12px;
+  padding: 7px 12px 8px;
+  background: var(--bg3);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}

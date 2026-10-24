@@ -1,0 +1,5 @@
+/* Copyright (C) 2026 The Text Find+ contributors
+   SPDX-License-Identifier: GPL-3.0-or-later */
+
+::highlight(text-find-plus-match)   { background-color: #ffe45c; color: #000; }
+::highlight(text-find-plus-current) { background-color: #ff9632; color: #000; }

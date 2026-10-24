@@ -1,0 +1,128 @@
+<!doctype html>
+<!-- Copyright (C) 2026 The Text Find+ contributors
+     SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en"><head><meta charset="utf-8"><title>Text Find+ test page</title>
+<style>.gone{display:none}.ghost{visibility:hidden}.contents{display:contents}</style>
+<script>/* color cheap flight inside a script must not match */</script>
+</head><body>
+<h1>Choosing a colour theme</h1>
+<p id="p-colour">Pick a <b>color</b> theme you like. British sites say colour, American sites say color, and both sell colours.</p>
+<p id="p-flights">Cheap flights to Istanbul start at $10. Flight prices are cheap in winter, so book a flight early.</p>
+<p id="p-flight-only">This paragraph mentions a flight but nothing about price.</p>
+<p id="p-deals">Our cheap <a href="#">flight</a> deals page lists more offers.</p>
+<h2>Code and files</h2>
+<p id="p-code">Developers love C++ and C#. Save the file as notes.txt, not notesXtxt.</p>
+<ul><li>Running shoes are on sale.</li><li>The runner ran a run before lunch.</li><li>Rerun the test if it fails.</li></ul>
+<h2>Contact</h2>
+<p id="p-contact">Call 555-1234 or 555-9876, or email help@example.com. Office hours from 3/14/2026: 9 to 5. Coffee is $2.50, cake $4.</p>
+<h2>Other languages</h2>
+<p id="p-lang">Turkish: çiçek (flower), çiçekçi (florist), ağaç (tree), İSTANBUL. German: Straße. Smile 🙂 done.</p>
+<p id="p-split">Phrase split by formatting: the <em>quick</em> brown fox jumps.<br>Line two starts here. NASA and the WHO use ALL CAPS names.</p>
+<h2>Must never match</h2>
+<p>Hidden: <span class="gone">zebra one</span><span class="ghost">zebra two</span><span hidden>zebra three</span></p>
+<textarea>zebra inside a textarea</textarea>
+<input value="zebra inside an input">
+<noscript>zebra inside noscript</noscript>
+<style>/* zebra inside a style */</style>
+<script>/* zebra inside a script */</script>
+<template><p>zebra inside a template</p></template>
+<select><option>zebra option</option></select>
+<video>zebra video fallback</video><audio>zebra audio fallback</audio><canvas>zebra canvas fallback</canvas>
+<h2>Web components</h2>
+<lantern-card id="wc-open"></lantern-card>
+<lantern-card id="wc-closed"></lantern-card>
+<lantern-card id="wc-nested"></lantern-card>
+<lantern-card id="wc-slotted">A slotted lantern.</lantern-card>
+<lantern-card id="wc-fallback"></lantern-card>
+<lantern-card id="wc-hidden" hidden></lantern-card>
+<lantern-card id="wc-unslotted"><span>An undisplayed lantern.</span></lantern-card>
+<lantern-card id="wc-ghost">A ghost lantern.</lantern-card>
+<lantern-card id="wc-z-boxless">boxless zircon</lantern-card>
+<lantern-card id="wc-z-veiled">veiled zircon</lantern-card>
+<lantern-card id="wc-z-slotted">slotted zircon</lantern-card>
+<lantern-card id="wc-z-unshown">unshown zircon</lantern-card>
+<div id="wc-z-div">divhost zircon</div>
+<lantern-card id="wc-zo-outer"></lantern-card>
+<lantern-card id="wc-z-mixed"><span>element zircon</span><lantern-card id="wc-zo-kid">kid zircon</lantern-card></lantern-card>
+<p id="p-zircon">The control zircon.</p>
+<p id="p-hello">Hello <name-tag id="wc-world"></name-tag></p>
+<div class="contents"><p id="p-contents">A compass inside a wrapper that has no box of its own.</p></div>
+<h2>Live</h2>
+<input type="button" id="ticker" value="Add a line every 2 seconds">
+<div id="live"></div>
+<lantern-card id="wc-live"></lantern-card>
+<script>
+// Web components for the tests (spec §8.1). The page keeps its closed roots in __closedRoots so the
+// tests can reach them; nothing else can. #wc-closed is closed on purpose: the extension must not find its
+// text (spec §4.6).
+globalThis.__closedRoots = [];
+const byId = (id) => document.getElementById(id);
+function shadow(host, mode, html) {
+  const root = host.attachShadow({ mode });
+  root.innerHTML = html;
+  if (mode === 'closed') __closedRoots.push(root);
+  return root;
+}
+shadow(byId('wc-open'), 'open', '<p>An open lantern.</p>');
+shadow(byId('wc-closed'), 'closed', '<p>A closed lantern.</p>');
+shadow(shadow(byId('wc-nested'), 'open', '<lantern-card></lantern-card>').firstChild, 'open', '<p>A nested lantern.</p>');
+shadow(byId('wc-slotted'), 'open', '<p><slot></slot></p>');
+shadow(byId('wc-fallback'), 'open', '<p><slot>A fallback lantern.</slot></p>');
+shadow(byId('wc-hidden'), 'open', '<p>A hidden lantern.</p>');
+shadow(byId('wc-unslotted'), 'open', '');
+shadow(byId('wc-ghost'), 'open', '<p style="visibility:hidden"><slot></slot></p>');
+shadow(byId('wc-world'), 'open', 'World');
+// Closed components with page text inside them (spec §4.6): one has no slot, one a slot under visibility:hidden,
+// one a plain slot, one a slot under display:none; a <div> host; a host inside an open root (#wc-zo-outer holds
+// the closed host, which has no id the page can query); and a host whose light DOM holds an element and an open
+// component (#wc-zo-kid) with slotted text. All are skipped, whatever they show; #p-zircon is the control that
+// is found.
+shadow(byId('wc-z-boxless'), 'closed', '<p>No slot here.</p>');
+shadow(byId('wc-z-veiled'), 'closed', '<p style="visibility:hidden"><slot></slot></p>');
+shadow(byId('wc-z-slotted'), 'closed', '<p><slot></slot></p>');
+shadow(byId('wc-z-unshown'), 'closed', '<p style="display:none"><slot></slot></p>');
+shadow(byId('wc-z-div'), 'closed', '<p><slot></slot></p>');
+const inner = shadow(byId('wc-zo-outer'), 'open', '<lantern-card id="wc-z-inner">inside zircon</lantern-card>').firstChild;
+shadow(inner, 'closed', '<p><slot></slot></p>');
+shadow(byId('wc-z-mixed'), 'closed', '<p><slot></slot></p>');
+shadow(byId('wc-zo-kid'), 'open', '<p><slot></slot></p>');
+const liveRoot = shadow(byId('wc-live'), 'open', '');
+
+// Page functions for the live-update tests.
+globalThis.__live = {
+  /** Add a line of text to the page, or inside the open component #wc-live; `first` puts it before the others. */
+  add(text, { id = '', inside = false, first = false } = {}) {
+    const p = document.createElement('p');
+    p.textContent = text;
+    p.dataset.id = id;
+    const box = inside ? liveRoot : byId('live');
+    if (first) box.prepend(p); else box.append(p);
+  },
+  /** Remove the line added with `id`. */
+  remove(id) {
+    for (const box of [byId('live'), liveRoot]) box.querySelector(`[data-id="${id}"]`)?.remove();
+  },
+  /** Remove every added line. */
+  reset() {
+    byId('live').replaceChildren();
+    liveRoot.replaceChildren();
+  },
+};
+byId('ticker').addEventListener('click', () => setInterval(() => __live.add('tick'), 2000), { once: true });
+
+/** Every shadow root on the page, open and closed. */
+globalThis.__shadowRoots = () => {
+  const roots = [];
+  const visit = (root) => {
+    for (const el of root.querySelectorAll('*')) if (el.shadowRoot) { roots.push(el.shadowRoot); visit(el.shadowRoot); }
+  };
+  visit(document);
+  for (const root of __closedRoots) { roots.push(root); visit(root); }
+  return roots;
+};
+</script>
+<h2>Frames</h2>
+<iframe id="same" src="frame.html" title="same-origin frame"></iframe>
+<iframe id="cross" title="cross-origin frame"></iframe>
+<script>const x = new URLSearchParams(location.search).get('xorigin'); if (x) document.getElementById('cross').src = x + '/frame.html';</script>
+</body></html>
