@@ -154,7 +154,7 @@ The screenshots and the tiles are PNGs without an alpha channel.
 |---|---|
 | Official URL | none |
 | Homepage URL | `https://github.com/MusKaya/text-find-plus` |
-| Support URL | `https://github.com/MusKaya/text-find-plus` |
+| Support URL | `https://github.com/MusKaya/text-find-plus/issues` |
 | Mature content | No |
 
 ## Privacy practices tab
