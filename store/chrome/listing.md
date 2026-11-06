@@ -141,11 +141,12 @@ English.
 | Screenshot 2 | `store/chrome/screenshot-2-regex.png` | 1280×800 |
 | Screenshot 3 | `store/chrome/screenshot-3-collapsed.png` | 1280×800 |
 | Screenshot 4 | `store/chrome/screenshot-4-all-words.png` | 1280×800 |
+| Screenshot 5 | `store/chrome/screenshot-5-phrase-wildcard.png` | 1280×800 |
 | Small promo tile | `store/chrome/promo-small-440x280.png` | 440×280 |
-| Marquee promo tile | none (optional) | |
+| Marquee promo tile | `store/chrome/promo-marquee-1400x560.png` | 1400×560 |
 | Promo video | none (optional) | |
 
-The screenshots and the tile are PNGs without an alpha channel.
+The screenshots and the tiles are PNGs without an alpha channel.
 
 ### Additional fields
 

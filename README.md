@@ -184,11 +184,12 @@ sits at the root of the zip: `build/text-find-plus-chrome-<version>.zip`, with t
 
 [`store/chrome/`](store/chrome/) holds what the Chrome Web Store asks for besides the zip.
 [`store/chrome/listing.md`](store/chrome/listing.md) has the text for each field of the developer dashboard
-(description, privacy answers, distribution) and says which image goes in which slot. The three 1280×800 screenshots
-and the 440×280 promo tile sit next to it; the store icon is `src/icons/icon128.png`.
+(description, privacy answers, distribution) and says which image goes in which slot. The five 1280×800 screenshots,
+the 440×280 small promo tile and the 1400×560 marquee promo tile sit next to it; the store icon is
+`src/icons/icon128.png`.
 
 The screenshots show the real popup and the real highlights on [`store/chrome/demo.html`](store/chrome/demo.html),
-a made-up article. After a change to the popup, make all four images again (headless, through the browser tests'
+a made-up article. After a change to the popup, make all seven images again (headless, through the browser tests'
 harness, so it needs Chrome for Testing as they do):
 
 ```bash

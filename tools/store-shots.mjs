@@ -1,7 +1,8 @@
 // Copyright (C) 2026 The Text Find+ contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Makes the Chrome Web Store images in store/chrome/: four 1280x800 screenshots of store/chrome/demo.html and the
-// 440x280 small promo tile drawn from store/chrome/promo-tile.html. Chrome for Testing loads the Chrome package,
+// Makes the Chrome Web Store images in store/chrome/: five 1280x800 screenshots of store/chrome/demo.html, the
+// 440x280 small promo tile drawn from store/chrome/promo-tile.html and the 1400x560 marquee promo tile drawn from
+// store/chrome/promo-marquee.html, which shows the first screenshot. Chrome for Testing loads the Chrome package,
 // assembled afresh from src/ and chrome/, unpacked through the test harness, the real popup is opened with the toolbar
 // action and used as a person would, and the highlights on the page are the real engine's. The popup is drawn over the
 // page at the top right, where Chrome shows it under its icon.
@@ -18,6 +19,7 @@ const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
 const STORE = 'store/chrome'; // the Chrome Web Store listing, relative to the repo
 const SHOT = { width: 1280, height: 800 }; // the store's screenshot size
 const TILE = { width: 440, height: 280 }; // the store's small promo tile
+const MARQUEE = { width: 1400, height: 560 }; // the store's marquee promo tile
 // Headless Chrome reports an 800x600 screen and keeps popups inside it, which cuts the popup short (with a scrollbar)
 // once it sits under the toolbar. A larger screen lets it take its real size, up to Chrome's 800x600 popup limit.
 const SCREEN = '1600x1200';
@@ -203,11 +205,32 @@ try {
     writePng('screenshot-4-all-words.png', await compose(browser, shots), SHOT);
   }
 
+  // 5. The Any box with a phrase in quotes and a word with a wildcard: "ice cream" is one match, grill* finds grill
+  //    and grilled; the second match current. In the dark theme.
+  {
+    const tab = await openTab(browser, server.origin + demo, SHOT);
+    const popup = await openPopup(browser, extId, tab, 'dark');
+    await popup.type('any', '"ice cream", grill*');
+    await until(popup.count, (c) => c === '1 of 5', 'the first of five matches');
+    await popup.click('#next');
+    await until(popup.count, (c) => c === '2 of 5', 'the second match');
+    const shots = await capture(tab, popup);
+    await closeOpenedPopup(browser, popup);
+    writePng('screenshot-5-phrase-wildcard.png', await compose(browser, shots), SHOT);
+  }
+
   // The small promo tile.
   {
     const tab = await openTab(browser, `${server.origin}/${STORE}/promo-tile.html`, TILE);
     await tab.session.evaluate(`Promise.all([...document.images].map((img) => img.decode()))`);
     writePng('promo-small-440x280.png', (await tab.session.send('Page.captureScreenshot', { format: 'png' })).data, TILE);
+  }
+
+  // The marquee promo tile; it shows screenshot 1, so it comes after it.
+  {
+    const tab = await openTab(browser, `${server.origin}/${STORE}/promo-marquee.html`, MARQUEE);
+    await tab.session.evaluate(`Promise.all([...document.images].map((img) => img.decode()))`);
+    writePng('promo-marquee-1400x560.png', (await tab.session.send('Page.captureScreenshot', { format: 'png' })).data, MARQUEE);
   }
 } finally {
   await browser.close();
