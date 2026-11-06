@@ -1,6 +1,6 @@
 // Copyright (C) 2026 The Text Find+ contributors
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Makes the Chrome Web Store images in store/chrome/: three 1280x800 screenshots of store/chrome/demo.html and the
+// Makes the Chrome Web Store images in store/chrome/: four 1280x800 screenshots of store/chrome/demo.html and the
 // 440x280 small promo tile drawn from store/chrome/promo-tile.html. Chrome for Testing loads the Chrome package,
 // assembled afresh from src/ and chrome/, unpacked through the test harness, the real popup is opened with the toolbar
 // action and used as a person would, and the highlights on the page are the real engine's. The popup is drawn over the
@@ -185,6 +185,22 @@ try {
     const shots = await capture(tab, popup);
     await closeOpenedPopup(browser, popup);
     writePng('screenshot-3-collapsed.png', await compose(browser, shots), SHOT);
+  }
+
+  // 4. The All box with two words, "in this order" and Whole words ticked: each market with the island after it is
+  //    one match, the second one current.
+  {
+    const tab = await openTab(browser, server.origin + demo, SHOT);
+    const popup = await openPopup(browser, extId, tab, 'light');
+    await popup.click('#ordered');
+    await popup.click('#wholeWords');
+    await popup.type('all', 'market, island');
+    await until(popup.count, (c) => c === '1 of 4', 'the first of four matches');
+    await popup.click('#next');
+    await until(popup.count, (c) => c === '2 of 4', 'the second match');
+    const shots = await capture(tab, popup);
+    await closeOpenedPopup(browser, popup);
+    writePng('screenshot-4-all-words.png', await compose(browser, shots), SHOT);
   }
 
   // The small promo tile.

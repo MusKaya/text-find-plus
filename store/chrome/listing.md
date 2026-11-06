@@ -140,6 +140,7 @@ English.
 | Screenshot 1 | `store/chrome/screenshot-1-words.png` | 1280×800 |
 | Screenshot 2 | `store/chrome/screenshot-2-regex.png` | 1280×800 |
 | Screenshot 3 | `store/chrome/screenshot-3-collapsed.png` | 1280×800 |
+| Screenshot 4 | `store/chrome/screenshot-4-all-words.png` | 1280×800 |
 | Small promo tile | `store/chrome/promo-small-440x280.png` | 440×280 |
 | Marquee promo tile | none (optional) | |
 | Promo video | none (optional) | |
